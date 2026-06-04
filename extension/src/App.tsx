@@ -1,7 +1,21 @@
-
-import './App.css'
-
+/// <reference types="chrome" />
+import { useEffect, useState } from "react";
+import "./App.css";
 function App() {
+  const [problemTitle, setProblemTitle] =
+    useState("Loading...");
+
+  useEffect(() => {
+    chrome.storage.local.get(
+      ["problemTitle"],
+      (result:any) => {
+        if (result.problemTitle) {
+          setProblemTitle(result.problemTitle);
+        }
+      }
+    );
+  }, []);
+
   return (
     <div className="w-[350px] min-h-screen bg-zinc-950 text-white p-4">
       <h1 className="text-2xl font-bold">
@@ -18,7 +32,7 @@ function App() {
         </h2>
 
         <p className="text-zinc-300 mt-2">
-          56. Merge Intervals
+          {problemTitle}
         </p>
       </div>
 
