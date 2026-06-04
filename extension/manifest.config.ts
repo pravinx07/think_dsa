@@ -10,9 +10,21 @@ export default defineManifest({
     default_popup: "index.html",
   },
 
-  permissions: ["storage", "activeTab"],
+  permissions: [
+    "storage",
+    "activeTab",
+  ],
 
   host_permissions: [
-    "https://leetcode.com/*"
+    "https://leetcode.com/*",
+  ],
+
+  content_scripts: [
+    {
+      matches: [
+        "https://leetcode.com/problems/*",
+      ],
+      js: ["src/content/content.ts"],
+    },
   ],
 });
