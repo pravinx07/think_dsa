@@ -38,6 +38,8 @@ router.post("/", async (req, res) => {
          initialPrompt += `Review my code:\n\n${code}\n\nPoint out boundary condition issues or bugs, but DO NOT rewrite the code.`;
       } else if (action === "complexity") {
          initialPrompt += `Analyze the time and space complexity of my code:\n\n${code}\n\nAsk me how I can optimize it if it's sub-optimal.`;
+      } else if (action === "dryrun") {
+         initialPrompt += `I want to dry run my code to find bugs or verify logic:\n\n${code}\n\nPlease ask me to pick a sample test case, and then ask me what happens to the variables line-by-line. If I make a logical mistake in my explanation, point it out gently.`;
       } else {
          initialPrompt += "Give first hint.";
       }
