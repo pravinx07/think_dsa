@@ -6,10 +6,6 @@ export default defineManifest({
   version: "1.0.0",
   description: "Learn DSA by thinking, not memorizing.",
 
-  action: {
-    default_popup: "index.html",
-  },
-
   permissions: [
     "storage",
     "activeTab",
@@ -24,7 +20,7 @@ export default defineManifest({
       matches: [
         "https://leetcode.com/problems/*",
       ],
-      js: ["src/content/content.ts"],
+      js: ["src/content/content.tsx"],
     },
   ],
 });
