@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import hintRoute from "./routes/hint.route.js";
 
 dotenv.config();
 
@@ -9,6 +10,8 @@ const PORT = process.env.PORT || 5000;
 
 app.use(cors());    
 app.use(express.json());
+
+app.use("/hint", hintRoute);
 
 app.get("/", (req, res) => {
     res.send("Hello from the server!");
