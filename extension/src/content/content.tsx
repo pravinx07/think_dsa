@@ -19,7 +19,8 @@ function getProblemDetails() {
         chrome.storage.local.set({ 
           problemTitle: title,
           problemDifficulty: difficulty || "Unknown",
-          problemDescription: description || ""
+          problemDescription: description || "",
+          problemStartTime: Date.now()
         });
       }
     });

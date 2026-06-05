@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import ReactMarkdown from "react-markdown";
-import { Brain, X, Loader2, Sparkles, Send, Network, Code2, Activity } from "lucide-react";
+import { Brain, X, Loader2, Sparkles, Send, Network, Code2, Activity, Timer, Play } from "lucide-react";
 
 type Message = {
   role: "user" | "ai";
@@ -16,21 +16,43 @@ export default function Sidebar() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const STRUGGLE_TIME = 300; // 5 minutes
+  const [startTime, setStartTime] = useState<number>(Date.now());
+  const [timeLeft, setTimeLeft] = useState(0);
+
   useEffect(() => {
-    chrome.storage.local.get(["problemTitle", "problemDifficulty"], (result) => {
+    chrome.storage.local.get(["problemTitle", "problemDifficulty", "problemStartTime"], (result) => {
       if (result.problemTitle) {
         setProblemTitle(result.problemTitle as string);
         setProblemDifficulty(result.problemDifficulty as string);
+      }
+      if (result.problemStartTime) {
+        setStartTime(result.problemStartTime as number);
       }
     });
 
     const listener = (changes: { [key: string]: chrome.storage.StorageChange }) => {
       if (changes.problemTitle) setProblemTitle(changes.problemTitle.newValue as string);
       if (changes.problemDifficulty) setProblemDifficulty(changes.problemDifficulty.newValue as string);
+      if (changes.problemStartTime) setStartTime(changes.problemStartTime.newValue as number);
     };
     chrome.storage.onChanged.addListener(listener);
     return () => chrome.storage.onChanged.removeListener(listener);
   }, []);
+
+  useEffect(() => {
+    const timerId = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - startTime) / 1000);
+      setTimeLeft(Math.max(0, STRUGGLE_TIME - elapsed));
+    }, 1000);
+    return () => clearInterval(timerId);
+  }, [startTime]);
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? '0' : ''}${s}`;
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -76,9 +98,9 @@ export default function Sidebar() {
     }
   }
 
-  async function triggerAction(action: "hint" | "pattern" | "review" | "complexity") {
+  async function triggerAction(action: "hint" | "pattern" | "review" | "complexity" | "dryrun") {
     let code = "";
-    if (action === "review" || action === "complexity") {
+    if (action === "review" || action === "complexity" || action === "dryrun") {
       const lineElements = document.querySelectorAll('.view-lines .view-line');
       if (lineElements.length === 0) {
         setMessages([...messages, { role: "ai", text: "I couldn't find your code. Make sure the editor is open and has code." }]);
@@ -93,6 +115,7 @@ export default function Sidebar() {
     if (action === "pattern") userMsg = "Help me find the pattern for this problem.";
     if (action === "review") userMsg = "Review my code.";
     if (action === "complexity") userMsg = "Analyze the time and space complexity of my code.";
+    if (action === "dryrun") userMsg = "Help me dry run my code step-by-step with a test case.";
 
     const newMessages: Message[] = [...messages, { role: "user", text: userMsg }];
     
@@ -179,10 +202,11 @@ export default function Sidebar() {
         </div>
         
         {/* Action Toolbar */}
-        <div className="grid grid-cols-3 gap-2 mt-2">
+        <div className="grid grid-cols-4 gap-2 mt-2">
           <button 
             onClick={() => triggerAction("pattern")}
-            className="flex flex-col items-center justify-center gap-1 bg-zinc-800/50 hover:bg-indigo-500/20 text-zinc-300 hover:text-indigo-400 border border-zinc-700/50 hover:border-indigo-500/30 rounded-xl py-2 transition-all"
+            disabled={timeLeft > 0}
+            className="flex flex-col items-center justify-center gap-1 bg-zinc-800/50 hover:bg-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-300 hover:text-indigo-400 border border-zinc-700/50 hover:border-indigo-500/30 rounded-xl py-2 transition-all"
           >
             <Network className="w-4 h-4" />
             <span className="text-[10px] font-medium uppercase tracking-wider">Pattern</span>
@@ -201,6 +225,13 @@ export default function Sidebar() {
             <Activity className="w-4 h-4" />
             <span className="text-[10px] font-medium uppercase tracking-wider">Complexity</span>
           </button>
+          <button 
+            onClick={() => triggerAction("dryrun")}
+            className="flex flex-col items-center justify-center gap-1 bg-zinc-800/50 hover:bg-sky-500/20 text-zinc-300 hover:text-sky-400 border border-zinc-700/50 hover:border-sky-500/30 rounded-xl py-2 transition-all"
+          >
+            <Play className="w-4 h-4" />
+            <span className="text-[10px] font-medium uppercase tracking-wider">Dry Run</span>
+          </button>
         </div>
       </div>
 
@@ -212,13 +243,27 @@ export default function Sidebar() {
             <p className="text-zinc-400 text-sm max-w-[250px]">
               Stuck on this problem? Ask for a hint, find the core pattern, or get your code reviewed!
             </p>
-            <button
-              onClick={() => triggerAction("hint")}
-              className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-6 rounded-full flex items-center gap-2 font-medium transition-all shadow-lg shadow-indigo-500/25"
-            >
-              <Sparkles className="w-4 h-4" />
-              Get Initial Hint
-            </button>
+            
+            {timeLeft > 0 ? (
+              <div className="flex flex-col items-center gap-2 mt-4 bg-zinc-900/80 border border-zinc-800 p-4 rounded-2xl">
+                <Timer className="w-6 h-6 text-orange-400 animate-pulse" />
+                <p className="text-sm font-semibold text-zinc-300">Struggle Timer</p>
+                <p className="text-2xl font-mono text-orange-400 tracking-wider">
+                  {formatTime(timeLeft)}
+                </p>
+                <p className="text-xs text-zinc-500 mt-1 max-w-[200px]">
+                  Take at least 5 minutes to think on your own before asking for a hint!
+                </p>
+              </div>
+            ) : (
+              <button
+                onClick={() => triggerAction("hint")}
+                className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-6 rounded-full flex items-center gap-2 font-medium transition-all shadow-lg shadow-indigo-500/25"
+              >
+                <Sparkles className="w-4 h-4" />
+                Get Initial Hint
+              </button>
+            )}
           </div>
         )}
 
@@ -266,12 +311,13 @@ export default function Sidebar() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask a question..."
-            className="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-white placeholder-zinc-500"
+            disabled={timeLeft > 0 && messages.length === 0}
+            placeholder={timeLeft > 0 && messages.length === 0 ? "Timer active. Keep thinking!" : "Ask a question..."}
+            className="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-white placeholder-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <button
             type="submit"
-            disabled={!input.trim() || loading}
+            disabled={!input.trim() || loading || (timeLeft > 0 && messages.length === 0)}
             className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-zinc-800 disabled:text-zinc-500 text-white p-3 rounded-xl transition-all flex items-center justify-center"
           >
             <Send className="w-5 h-5" />
