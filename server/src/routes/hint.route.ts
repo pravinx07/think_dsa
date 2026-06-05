@@ -40,6 +40,8 @@ router.post("/", async (req, res) => {
          initialPrompt += `Analyze the time and space complexity of my code:\n\n${code}\n\nAsk me how I can optimize it if it's sub-optimal.`;
       } else if (action === "dryrun") {
          initialPrompt += `I want to dry run my code to find bugs or verify logic:\n\n${code}\n\nPlease ask me to pick a sample test case, and then ask me what happens to the variables line-by-line. If I make a logical mistake in my explanation, point it out gently.`;
+      } else if (action === "stepdown") {
+         initialPrompt += `I am completely lost on this problem. Please identify the core foundational concept (e.g., Two Pointers, BFS, etc.) and recommend 1 or 2 specific, easier LeetCode problems I should solve first to build my intuition before attempting this one. Explain WHY those problems help.`;
       } else {
          initialPrompt += "Give first hint.";
       }
