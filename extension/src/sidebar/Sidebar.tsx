@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import ReactMarkdown from "react-markdown";
-import { Brain, X, Loader2, Sparkles, Send, Network, Code2, Activity, Timer, Play } from "lucide-react";
+import { Brain, X, Loader2, Sparkles, Send, Network, Code2, Activity, Timer, Play, Compass, BarChart } from "lucide-react";
 
 type Message = {
   role: "user" | "ai";
@@ -15,6 +15,25 @@ export default function Sidebar() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const [activeTab, setActiveTab] = useState<"chat" | "scratchpad" | "dashboard">("chat");
+  const [scratchpadText, setScratchpadText] = useState("");
+  const [problemStats, setProblemStats] = useState<Record<string, { hints: number }>>({});
+
+  useEffect(() => {
+    if (problemTitle && problemTitle !== "Loading...") {
+       chrome.storage.local.get([`scratchpad_${problemTitle}`, "problemStats"], (res) => {
+         setScratchpadText((res[`scratchpad_${problemTitle}`] as string) || "");
+         setProblemStats((res.problemStats as Record<string, { hints: number }>) || {});
+       });
+    }
+  }, [problemTitle]);
+
+  const handleScratchpadChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const val = e.target.value;
+    setScratchpadText(val);
+    chrome.storage.local.set({ [`scratchpad_${problemTitle}`]: val });
+  };
 
   const STRUGGLE_TIME = 300; // 5 minutes
   const [startTime, setStartTime] = useState<number>(Date.now());
@@ -74,6 +93,13 @@ export default function Sidebar() {
   async function sendMessage(text: string) {
     if (!text.trim()) return;
 
+    // Track hint/interaction count
+    const updatedStats = { ...problemStats };
+    if (!updatedStats[problemTitle]) updatedStats[problemTitle] = { hints: 0 };
+    updatedStats[problemTitle].hints += 1;
+    setProblemStats(updatedStats);
+    chrome.storage.local.set({ problemStats: updatedStats });
+
     const newMessages: Message[] = [...messages, { role: "user", text }];
     setMessages(newMessages);
     setInput("");
@@ -98,7 +124,7 @@ export default function Sidebar() {
     }
   }
 
-  async function triggerAction(action: "hint" | "pattern" | "review" | "complexity" | "dryrun") {
+  async function triggerAction(action: "hint" | "pattern" | "review" | "complexity" | "dryrun" | "stepdown") {
     let code = "";
     if (action === "review" || action === "complexity" || action === "dryrun") {
       const lineElements = document.querySelectorAll('.view-lines .view-line');
@@ -116,6 +142,16 @@ export default function Sidebar() {
     if (action === "review") userMsg = "Review my code.";
     if (action === "complexity") userMsg = "Analyze the time and space complexity of my code.";
     if (action === "dryrun") userMsg = "Help me dry run my code step-by-step with a test case.";
+    if (action === "stepdown") userMsg = "I am completely lost. Can you recommend 1-2 easier foundational problems I should solve first?";
+
+    // Track hint count for generic hints and patterns
+    if (action === "hint" || action === "pattern" || action === "stepdown") {
+      const updatedStats = { ...problemStats };
+      if (!updatedStats[problemTitle]) updatedStats[problemTitle] = { hints: 0 };
+      updatedStats[problemTitle].hints += 1;
+      setProblemStats(updatedStats);
+      chrome.storage.local.set({ problemStats: updatedStats });
+    }
 
     const newMessages: Message[] = [...messages, { role: "user", text: userMsg }];
     
@@ -183,7 +219,68 @@ export default function Sidebar() {
         </button>
       </div>
 
-      {/* Problem Context */}
+      {/* Tabs */}
+      <div className="flex border-b border-zinc-800/50 bg-zinc-900/50">
+        <button 
+          onClick={() => setActiveTab("chat")}
+          className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'chat' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900/20'}`}
+        >
+          Chat Assistant
+        </button>
+        <button 
+          onClick={() => setActiveTab("scratchpad")}
+          className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'scratchpad' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900/20'}`}
+        >
+          Scratchpad
+        </button>
+        <button 
+          onClick={() => setActiveTab("dashboard")}
+          className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'dashboard' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900/20'}`}
+        >
+          Dashboard
+        </button>
+      </div>
+
+      {activeTab === "scratchpad" ? (
+        <div className="flex-1 flex flex-col p-4 bg-zinc-950">
+          <p className="text-xs text-zinc-500 mb-2">Use this space to trace algorithms, write pseudocode, or jot down ideas. Auto-saves locally.</p>
+          <textarea
+            value={scratchpadText}
+            onChange={handleScratchpadChange}
+            placeholder="Write your notes or pseudocode here..."
+            className="flex-1 w-full bg-transparent resize-none text-zinc-300 font-mono text-sm focus:outline-none placeholder-zinc-700"
+            spellCheck={false}
+          />
+        </div>
+      ) : activeTab === "dashboard" ? (
+        <div className="flex-1 flex flex-col p-5 bg-zinc-950 overflow-y-auto">
+          <div className="flex items-center gap-3 mb-6 border-b border-zinc-800 pb-4">
+            <BarChart className="w-6 h-6 text-indigo-500" />
+            <h2 className="text-lg font-bold text-white">Learning Analytics</h2>
+          </div>
+          <p className="text-sm text-zinc-400 mb-4">Track how much you rely on hints to identify weak patterns.</p>
+          
+          <div className="space-y-3">
+            {Object.entries(problemStats).length === 0 ? (
+              <p className="text-sm text-zinc-500 italic">Solve some problems and use hints to see your stats here.</p>
+            ) : (
+              Object.entries(problemStats).map(([title, stats]) => (
+                <div key={title} className="bg-zinc-900/80 border border-zinc-800 p-3 rounded-xl flex justify-between items-center">
+                  <span className="text-sm text-zinc-300 font-medium truncate max-w-[220px]">{title}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-zinc-500">Hints:</span>
+                    <span className={`text-sm font-bold ${stats.hints > 3 ? 'text-red-400' : stats.hints > 1 ? 'text-yellow-400' : 'text-emerald-400'}`}>
+                      {stats.hints}
+                    </span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* Problem Context */}
       <div className="px-5 py-4 bg-zinc-900/50 border-b border-zinc-800/50 flex flex-col gap-2">
         <div className="flex justify-between items-start">
           <div>
@@ -202,35 +299,47 @@ export default function Sidebar() {
         </div>
         
         {/* Action Toolbar */}
-        <div className="grid grid-cols-4 gap-2 mt-2">
+        <div className="grid grid-cols-5 gap-2 mt-2">
           <button 
             onClick={() => triggerAction("pattern")}
             disabled={timeLeft > 0}
             className="flex flex-col items-center justify-center gap-1 bg-zinc-800/50 hover:bg-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-300 hover:text-indigo-400 border border-zinc-700/50 hover:border-indigo-500/30 rounded-xl py-2 transition-all"
+            title="Find Pattern"
           >
             <Network className="w-4 h-4" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">Pattern</span>
+            <span className="text-[9px] font-medium uppercase tracking-wider">Pattern</span>
+          </button>
+          <button 
+            onClick={() => triggerAction("stepdown")}
+            className="flex flex-col items-center justify-center gap-1 bg-zinc-800/50 hover:bg-rose-500/20 text-zinc-300 hover:text-rose-400 border border-zinc-700/50 hover:border-rose-500/30 rounded-xl py-2 transition-all"
+            title="I'm Lost"
+          >
+            <Compass className="w-4 h-4" />
+            <span className="text-[9px] font-medium uppercase tracking-wider">Lost</span>
           </button>
           <button 
             onClick={() => triggerAction("review")}
             className="flex flex-col items-center justify-center gap-1 bg-zinc-800/50 hover:bg-emerald-500/20 text-zinc-300 hover:text-emerald-400 border border-zinc-700/50 hover:border-emerald-500/30 rounded-xl py-2 transition-all"
+            title="Review Code"
           >
             <Code2 className="w-4 h-4" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">Review</span>
+            <span className="text-[9px] font-medium uppercase tracking-wider">Review</span>
           </button>
           <button 
             onClick={() => triggerAction("complexity")}
             className="flex flex-col items-center justify-center gap-1 bg-zinc-800/50 hover:bg-orange-500/20 text-zinc-300 hover:text-orange-400 border border-zinc-700/50 hover:border-orange-500/30 rounded-xl py-2 transition-all"
+            title="Analyze Complexity"
           >
             <Activity className="w-4 h-4" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">Complexity</span>
+            <span className="text-[9px] font-medium uppercase tracking-wider">Big-O</span>
           </button>
           <button 
             onClick={() => triggerAction("dryrun")}
             className="flex flex-col items-center justify-center gap-1 bg-zinc-800/50 hover:bg-sky-500/20 text-zinc-300 hover:text-sky-400 border border-zinc-700/50 hover:border-sky-500/30 rounded-xl py-2 transition-all"
+            title="Dry Run"
           >
             <Play className="w-4 h-4" />
-            <span className="text-[10px] font-medium uppercase tracking-wider">Dry Run</span>
+            <span className="text-[9px] font-medium uppercase tracking-wider">Dry Run</span>
           </button>
         </div>
       </div>
@@ -324,6 +433,8 @@ export default function Sidebar() {
           </button>
         </form>
       </div>
+        </>
+      )}
     </div>
   );
 }
