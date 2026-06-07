@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/react'
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -23,7 +24,7 @@ export default function Navbar() {
           </span>
         </div>
 
-        {/* Links */}
+        {/* Links & Auth */}
         <div className="flex items-center gap-3">
           <a
             href="#features"
@@ -37,13 +38,30 @@ export default function Navbar() {
           >
             How it works
           </a>
-          <a
-            id="nav-get-started"
-            href="#cta"
-            className="glow-btn px-5 py-2 text-sm font-semibold text-white rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500"
-          >
-            Get Started →
-          </a>
+          <Show when="signed-out">
+            <SignInButton mode="modal">
+              <button className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition-colors">
+                Log In
+              </button>
+            </SignInButton>
+            <SignUpButton mode="modal">
+              <button
+                id="nav-get-started"
+                className="glow-btn px-5 py-2 text-sm font-semibold text-white rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500"
+              >
+                Get Started →
+              </button>
+            </SignUpButton>
+          </Show>
+          <Show when="signed-in">
+            <a
+              href="/dashboard"
+              className="px-4 py-2 text-sm font-medium text-indigo-300 hover:text-indigo-200 border border-indigo-500/30 rounded-xl hover:bg-indigo-500/10 transition-all duration-200 mr-2"
+            >
+              Dashboard
+            </a>
+            <UserButton />
+          </Show>
         </div>
       </div>
     </nav>
