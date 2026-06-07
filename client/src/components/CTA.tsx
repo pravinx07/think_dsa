@@ -1,3 +1,5 @@
+import { Show, SignUpButton } from '@clerk/react'
+
 export default function CTA() {
   return (
     <section id="cta" className="py-28 relative overflow-hidden bg-[#050510]">
@@ -22,13 +24,25 @@ export default function CTA() {
             Install the ThinkDSA Chrome extension and transform every LeetCode session into real learning.
           </p>
 
-          <a
-            id="cta-install-btn"
-            href="#"
-            className="glow-btn inline-flex items-center gap-2.5 px-10 py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-semibold text-lg"
-          >
-            🚀 Start Learning Free
-          </a>
+          <Show when="signed-out">
+            <SignUpButton mode="modal">
+              <button
+                id="cta-install-btn"
+                className="glow-btn inline-flex items-center gap-2.5 px-10 py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-semibold text-lg cursor-pointer"
+              >
+                🚀 Start Learning Free
+              </button>
+            </SignUpButton>
+          </Show>
+          <Show when="signed-in">
+            <a
+              id="cta-install-btn"
+              href="/dashboard"
+              className="glow-btn inline-flex items-center gap-2.5 px-10 py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-semibold text-lg"
+            >
+              🚀 Go to Dashboard
+            </a>
+          </Show>
 
           <p className="text-slate-600 text-sm mt-6">
             Free to install · Works on Chrome · No account needed yet

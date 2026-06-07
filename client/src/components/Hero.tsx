@@ -1,3 +1,5 @@
+import { Show, SignUpButton } from '@clerk/react'
+
 export default function Hero() {
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden bg-[#050510] grid-bg pt-24 pb-20">
@@ -30,16 +32,31 @@ export default function Hero() {
 
         {/* CTA buttons */}
         <div className="opacity-0 animate-fade-up delay-400 flex flex-wrap gap-4 justify-center mb-20">
-          <a
-            id="hero-get-started"
-            href="#cta"
-            className="glow-btn inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-semibold text-base"
-          >
-            Get Started Free
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </a>
+          <Show when="signed-out">
+            <SignUpButton mode="modal">
+              <button
+                id="hero-get-started"
+                className="glow-btn inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-semibold text-base"
+              >
+                Get Started Free
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M5 12h14M12 5l7 7-7 7" />
+                </svg>
+              </button>
+            </SignUpButton>
+          </Show>
+          <Show when="signed-in">
+            <a
+              id="hero-get-started"
+              href="/dashboard"
+              className="glow-btn inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-semibold text-base"
+            >
+              Go to Dashboard
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7" />
+              </svg>
+            </a>
+          </Show>
           <a
             href="#how-it-works"
             className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl border border-white/10 text-slate-300 font-medium text-base hover:border-indigo-500/40 hover:bg-indigo-500/5 transition-all duration-200"
