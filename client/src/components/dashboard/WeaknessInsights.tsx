@@ -1,4 +1,4 @@
-import { mockWeaknessInsights } from '../../data/mockData'
+import { useData } from '../../contexts/DataContext'
 
 const freqStyle: Record<string, string> = {
   High: 'text-red-400 bg-red-500/10 border-red-500/20',
@@ -7,6 +7,9 @@ const freqStyle: Record<string, string> = {
 }
 
 export default function WeaknessInsights() {
+  const { data } = useData()
+  const mockWeaknessInsights = data.weaknessInsights || []
+
   return (
     <div className="glass-card rounded-2xl p-6 mb-6">
       <div className="flex items-center gap-2 mb-6">

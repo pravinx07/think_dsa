@@ -1,4 +1,4 @@
-import { mockStrongAreas, mockWeakAreas } from '../../data/mockData'
+import { useData } from '../../contexts/DataContext'
 
 function AreaCard({ name, emoji, mastery, isStrong }: { name: string; emoji: string; mastery: number; isStrong: boolean }) {
   return (
@@ -22,6 +22,10 @@ function AreaCard({ name, emoji, mastery, isStrong }: { name: string; emoji: str
 }
 
 export default function StrengthAnalysis() {
+  const { data } = useData()
+  const mockStrongAreas = data.strongAreas || []
+  const mockWeakAreas = data.weakAreas || []
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
       {/* Strong Areas */}
