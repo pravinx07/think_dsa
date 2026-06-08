@@ -1,6 +1,8 @@
-import { mockHintStats } from '../../data/mockData'
+import { useData } from '../../contexts/DataContext'
 
 export default function HintDependency() {
+  const { data } = useData()
+  const mockHintStats = data.hintStats || { dependencyPercent: 0, thisWeek: { withHint: 0, withoutHint: 0 } }
   const { dependencyPercent, solvedWithoutHint, totalSolved, avgHintsPerProblem, thisWeek } = mockHintStats
   const independencePercent = 100 - dependencyPercent
 
