@@ -1,11 +1,11 @@
 import type { Request, Response } from 'express';
+import { getAuth } from '@clerk/express';
 import { User } from '../models/User.model.js';
 import { Activity } from '../models/Activity.model.js';
 
 export const seedDatabase = async (req: Request, res: Response) => {
   try {
-    // @ts-ignore
-    const userId = req.auth?.userId;
+    const { userId } = getAuth(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     // Update user to have activity

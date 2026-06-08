@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import { getAuth } from '@clerk/express';
 import { User } from '../models/User.model.js';
 import { Activity } from '../models/Activity.model.js';
 
@@ -42,8 +43,7 @@ const patternEmojis: Record<string, string> = {
 
 export const getDashboardHome = async (req: Request, res: Response) => {
   try {
-    // @ts-ignore
-    const userId = req.auth?.userId;
+    const { userId } = getAuth(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const user = await getOrCreateUser(userId);
@@ -92,8 +92,7 @@ export const getDashboardHome = async (req: Request, res: Response) => {
 
 export const getAnalytics = async (req: Request, res: Response) => {
   try {
-    // @ts-ignore
-    const userId = req.auth?.userId;
+    const { userId } = getAuth(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const patternStats = await Activity.aggregate([
@@ -152,8 +151,7 @@ export const getRoadmap = async (req: Request, res: Response) => {
 
 export const getHistory = async (req: Request, res: Response) => {
   try {
-    // @ts-ignore
-    const userId = req.auth?.userId;
+    const { userId } = getAuth(req);
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
 
     const history = await Activity.find({ userId }).sort({ _id: -1 });
