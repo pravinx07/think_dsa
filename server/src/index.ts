@@ -5,8 +5,10 @@ import hintRoute from "./routes/hint.route.js";
 import dashboardRoute from "./routes/dashboard.route.js";
 import mentorRoute from "./routes/mentor.route.js";
 import { clerkMiddleware, requireAuth } from '@clerk/express';
+import { connectDB } from './config/db.js';
 
 dotenv.config();
+connectDB();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
