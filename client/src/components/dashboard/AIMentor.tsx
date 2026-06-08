@@ -1,38 +1,53 @@
-import { useState } from 'react'
-import { mockMentorMessages, mockMentorSuggestions, mockUser, mockWeakAreas } from '../../data/mockData'
+import { useState, useEffect } from 'react'
+import { useApi } from '../../hooks/useApi'
+import { useData } from '../../contexts/DataContext'
 
 type Message = { role: 'user' | 'assistant'; content: string }
 
-const aiReplies: Record<string, string> = {
-  default: `Great question! Based on your profile, I see you've solved ${47} problems. Your strongest area is Sliding Window (80%). I recommend focusing on Dynamic Programming next — start with "Climbing Stairs" to build DP intuition from scratch.`,
-  dp: `You struggle with DP because you're trying to memorize solutions instead of understanding the subproblem structure. Here's my advice:\n\n1. **Ask**: "What's the smallest version of this problem?"\n2. **Define** the DP state clearly before coding\n3. **Start** with recursion + memoization, then optimize to tabulation\n\nYour "Coin Change" attempt showed you understand the concept — you just need more reps. Try "House Robber" next.`,
-  graph: `Graph problems feel hard because the setup is more about bookkeeping than algorithms. Your mistake log shows you forgot the visited set twice.\n\n**My fix for you**: Write this template before every graph problem:\n\`\`\`\nvisited = set()\nqueue = deque([start])\nvisited.add(start)\n\`\`\`\nThen adapt. You'll never forget again.`,
-  week: `Based on your progress, here's your focus for this week:\n\n• **Day 1-2**: Merge Intervals (weak area — Intervals)\n• **Day 3-4**: Rotate Image (new pattern — Matrix)\n• **Day 5-6**: Coin Change II (continue DP practice)\n• **Day 7**: Review your mistake notes\n\nYou're on a 12-day streak — don't break it! 🔥`,
-}
-
-function getAIReply(input: string): string {
-  const lower = input.toLowerCase()
-  if (lower.includes('dp') || lower.includes('dynamic')) return aiReplies.dp
-  if (lower.includes('graph')) return aiReplies.graph
-  if (lower.includes('week') || lower.includes('focus') || lower.includes('study')) return aiReplies.week
-  return aiReplies.default
-}
-
 export default function AIMentor() {
-  const [messages, setMessages] = useState<Message[]>(mockMentorMessages)
+  const { data } = useData()
+  const mockUser = data.user || { level: 'Unknown', streak: 0 }
+  const mockWeakAreas = data.weakAreas || []
+  
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: 'assistant',
+      content: "Hey! 👋 I've analyzed your progress. Let me know what you want to practice or if you need help with a problem.",
+    }
+  ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const { fetchApi } = useApi()
 
-  const send = (text?: string) => {
+  const mockMentorSuggestions = [
+    'Why am I bad at DP?',
+    'How do I approach Graph problems?',
+    'What should I focus on this week?',
+  ]
+
+  const send = async (text?: string) => {
     const msg = text ?? input.trim()
     if (!msg) return
+    
     setMessages((prev) => [...prev, { role: 'user', content: msg }])
     setInput('')
     setLoading(true)
-    setTimeout(() => {
-      setMessages((prev) => [...prev, { role: 'assistant', content: getAIReply(msg) }])
+    
+    try {
+      const data = await fetchApi('/mentor/chat', {
+        method: 'POST',
+        body: JSON.stringify({ 
+          message: msg,
+          context: { level: mockUser.level, weakAreas: mockWeakAreas.map(a => a.name).join(', ') }
+        })
+      });
+      setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
+    } catch (err) {
+      console.error(err);
+      setMessages((prev) => [...prev, { role: 'assistant', content: "Sorry, I couldn't connect to the server." }]);
+    } finally {
       setLoading(false)
-    }, 1200)
+    }
   }
 
   return (

@@ -1,4 +1,4 @@
-import { mockRecommendedProblems } from '../../data/mockData'
+import { useData } from '../../contexts/DataContext'
 
 const difficultyStyle: Record<string, string> = {
   Easy: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
@@ -7,6 +7,9 @@ const difficultyStyle: Record<string, string> = {
 }
 
 export default function RecommendedProblems() {
+  const { data } = useData()
+  const mockRecommendedProblems = data.recommendedProblems || []
+
   return (
     <div className="glass-card rounded-2xl p-6 mb-8">
       <div className="flex items-center justify-between mb-6">

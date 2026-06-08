@@ -1,12 +1,14 @@
-import { mockRoadmap } from '../../data/mockData'
+import { useData } from '../../contexts/DataContext'
 
-const statusConfig = {
+const statusConfig: Record<string, { label: string; dot: string; bar: string; text: string }> = {
   completed: { label: 'Done', dot: 'bg-emerald-400', bar: 'bg-emerald-500/20 border-emerald-500/20', text: 'text-emerald-400' },
   'in-progress': { label: 'In Progress', dot: 'bg-indigo-400 animate-pulse', bar: 'bg-indigo-500/15 border-indigo-500/25', text: 'text-indigo-400' },
   upcoming: { label: 'Upcoming', dot: 'bg-slate-700', bar: 'bg-white/[0.02] border-white/5', text: 'text-slate-600' },
 }
 
 export default function Roadmap() {
+  const { data } = useData()
+  const mockRoadmap = data.roadmap || []
   return (
     <div className="space-y-6">
       {/* Header */}

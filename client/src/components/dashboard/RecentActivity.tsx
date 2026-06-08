@@ -1,4 +1,4 @@
-import { mockRecentActivity } from '../../data/mockData'
+import { useData } from '../../contexts/DataContext'
 
 const difficultyStyle: Record<string, string> = {
   Easy: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
@@ -7,6 +7,9 @@ const difficultyStyle: Record<string, string> = {
 }
 
 export default function RecentActivity() {
+  const { data } = useData()
+  const mockRecentActivity = data.history || data.recentActivity || []
+
   return (
     <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center gap-2 mb-6">

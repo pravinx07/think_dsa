@@ -1,6 +1,8 @@
-import { mockUser } from '../../data/mockData'
+import { useData } from '../../contexts/DataContext'
 
 export default function DashboardHeader() {
+  const { data } = useData()
+  const mockUser = data.user || {}
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening'
 

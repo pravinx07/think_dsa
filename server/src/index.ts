@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import hintRoute from "./routes/hint.route.js";
+import dashboardRoute from "./routes/dashboard.route.js";
+import mentorRoute from "./routes/mentor.route.js";
 import { clerkMiddleware, requireAuth } from '@clerk/express';
 
 dotenv.config();
@@ -14,6 +16,8 @@ app.use(express.json());
 app.use(clerkMiddleware());
 
 app.use("/hint", hintRoute);
+app.use("/api/dashboard", requireAuth(), dashboardRoute);
+app.use("/api/mentor", requireAuth(), mentorRoute);
 
 app.get("/api/protected", requireAuth(), (req, res) => {
     res.json({ message: "You are authenticated!", userId: req.auth.userId });
