@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express';
+import { getAuth } from '@clerk/express';
 import { GoogleGenAI } from '@google/genai';
 
 export const chatWithMentor = async (req: Request, res: Response) => {
