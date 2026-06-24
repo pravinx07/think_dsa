@@ -13,7 +13,7 @@ export default function WeaknessInsights() {
   return (
     <div className="glass-card rounded-2xl p-6 mb-6">
       <div className="flex items-center gap-2 mb-6">
-        <div className="w-8 h-8 rounded-xl bg-rose-500/15 border border-rose-500/25 flex items-center justify-center text-sm">🔍</div>
+        <div className="w-8 h-8 rounded-xl bg-rose-500/15 border border-rose-500/25 flex items-center justify-center text-sm"></div>
         <div>
           <h3 className="text-sm font-bold text-slate-100">AI Weakness Insights</h3>
           <p className="text-xs text-slate-600">Personalized analysis of your mistakes</p>
@@ -22,7 +22,7 @@ export default function WeaknessInsights() {
 
       {/* AI summary */}
       <div className="glass rounded-xl p-4 mb-5 border-indigo-500/20">
-        <p className="text-xs text-indigo-400 font-semibold mb-2">🤖 AI Analysis</p>
+        <p className="text-xs text-indigo-400 font-semibold mb-2"> AI Analysis</p>
         <p className="text-sm text-slate-400 leading-relaxed">
           You often <span className="text-slate-200 font-medium">jump to brute force</span> before identifying the optimal pattern.
           Focus on pattern recognition as the first step before writing any code.

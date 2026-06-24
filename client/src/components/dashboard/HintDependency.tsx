@@ -9,7 +9,7 @@ export default function HintDependency() {
   return (
     <div className="glass-card rounded-2xl p-6">
       <div className="flex items-center gap-2 mb-6">
-        <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-sm">💡</div>
+        <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-sm"></div>
         <div>
           <h3 className="text-sm font-bold text-slate-100">Hint Dependency</h3>
           <p className="text-xs text-slate-600">How independent is your problem-solving?</p>
@@ -62,11 +62,11 @@ export default function HintDependency() {
         <div className="grid grid-cols-2 gap-3">
           <div className="text-center">
             <p className="text-xl font-black text-emerald-400">{thisWeek.withoutHint}</p>
-            <p className="text-xs text-slate-600">Without Hint ✅</p>
+            <p className="text-xs text-slate-600">Without Hint </p>
           </div>
           <div className="text-center">
             <p className="text-xl font-black text-amber-400">{thisWeek.withHint}</p>
-            <p className="text-xs text-slate-600">With Hint 💡</p>
+            <p className="text-xs text-slate-600">With Hint </p>
           </div>
         </div>
       </div>

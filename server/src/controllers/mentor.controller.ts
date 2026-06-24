@@ -10,7 +10,7 @@ export const chatWithMentor = async (req: Request, res: Response) => {
     if (!process.env.GOOGLE_API_KEY) {
       // Mock response if no API key
       return res.json({ 
-        reply: "Hey Ajay! 👋 I've analyzed your progress. You're strong at Sliding Window (80%) and Arrays. Your main growth area right now is **Dynamic Programming** — you've only solved 4 DP problems. Want to work on that?" 
+        reply: "Hey Ajay!  I've analyzed your progress. You're strong at Sliding Window (80%) and Arrays. Your main growth area right now is **Dynamic Programming** — you've only solved 4 DP problems. Want to work on that?" 
       });
     }
 

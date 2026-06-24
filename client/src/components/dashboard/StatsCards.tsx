@@ -8,7 +8,7 @@ export default function StatsCards() {
     {
       label: 'Problems Solved',
       value: mockUser.problemsSolved,
-      icon: '✅',
+      icon: '',
       sub: '+3 this week',
       iconBg: 'bg-emerald-500/15 border-emerald-500/25',
       color: 'text-emerald-400',
@@ -16,7 +16,7 @@ export default function StatsCards() {
     {
       label: 'Hints Used',
       value: mockUser.hintsUsed,
-      icon: '💡',
+      icon: '',
       sub: '35% dependency',
       iconBg: 'bg-amber-500/15 border-amber-500/25',
       color: 'text-amber-400',
@@ -24,7 +24,7 @@ export default function StatsCards() {
     {
       label: 'Current Streak',
       value: `${mockUser.streak}d`,
-      icon: '🔥',
+      icon: '',
       sub: 'Personal best!',
       iconBg: 'bg-orange-500/15 border-orange-500/25',
       color: 'text-orange-400',
@@ -32,7 +32,7 @@ export default function StatsCards() {
     {
       label: 'Learning Level',
       value: mockUser.level,
-      icon: '🎯',
+      icon: '',
       sub: '70% to Advanced',
       iconBg: 'bg-violet-500/15 border-violet-500/25',
       color: 'text-violet-400',

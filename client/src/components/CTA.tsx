@@ -30,7 +30,7 @@ export default function CTA() {
                 id="cta-install-btn"
                 className="glow-btn inline-flex items-center gap-2.5 px-10 py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-semibold text-lg cursor-pointer"
               >
-                🚀 Start Learning Free
+              Start Learning Free
               </button>
             </SignUpButton>
           </Show>
@@ -40,7 +40,7 @@ export default function CTA() {
               href="/dashboard"
               className="glow-btn inline-flex items-center gap-2.5 px-10 py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-500 text-white font-semibold text-lg"
             >
-              🚀 Go to Dashboard
+              Go to Dashboard
             </a>
           </Show>
 

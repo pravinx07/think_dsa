@@ -12,7 +12,7 @@ export default function Hero() {
         {/* Badge */}
         <div className="opacity-0 animate-fade-up delay-100 mb-8 flex justify-center">
           <span className="badge-shimmer inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-indigo-500/30 text-indigo-300 text-sm font-medium">
-            ✦ Browser Extension for LeetCode
+             Browser Extension for LeetCode
           </span>
         </div>
 
@@ -82,7 +82,7 @@ export default function Hero() {
               <div className="flex-1">
                 <p className="text-xs text-slate-600 font-semibold uppercase tracking-widest mb-3">Problem Pattern</p>
                 <div className="glass rounded-xl px-4 py-3 mb-2.5 flex items-center gap-3">
-                  <span className="text-lg">🔄</span>
+                  <span className="text-lg"></span>
                   <div>
                     <p className="text-sm font-semibold text-slate-200">Sliding Window</p>
                     <p className="text-xs text-slate-500">Mastery: 87%</p>
@@ -90,7 +90,7 @@ export default function Hero() {
                   <div className="ml-auto w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
                 </div>
                 <div className="glass rounded-xl px-4 py-3 flex items-center gap-3">
-                  <span className="text-lg">🌲</span>
+                  <span className="text-lg"></span>
                   <div>
                     <p className="text-sm font-semibold text-slate-200">Tree Traversal</p>
                     <p className="text-xs text-slate-500">Mastery: 64%</p>
@@ -103,7 +103,7 @@ export default function Hero() {
               <div className="flex-1">
                 <p className="text-xs text-slate-600 font-semibold uppercase tracking-widest mb-3">AI Hint</p>
                 <div className="glass rounded-xl p-4 border-indigo-500/20">
-                  <p className="text-xs text-indigo-400 font-semibold mb-2">💡 ThinkDSA suggests:</p>
+                  <p className="text-xs text-indigo-400 font-semibold mb-2"> ThinkDSA suggests:</p>
                   <p className="text-xs text-slate-400 leading-relaxed">
                     Consider the two-pointer approach. What happens when you move the right pointer? Think about the window invariant first.
                   </p>
