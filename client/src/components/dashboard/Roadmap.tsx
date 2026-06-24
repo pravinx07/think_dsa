@@ -14,7 +14,7 @@ export default function Roadmap() {
       {/* Header */}
       <div className="glass-card rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-2">
-          <div className="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-500/25 flex items-center justify-center text-sm">🗺️</div>
+          <div className="w-8 h-8 rounded-xl bg-violet-500/15 border border-violet-500/25 flex items-center justify-center text-sm"></div>
           <div>
             <h3 className="text-sm font-bold text-slate-100">AI-Generated Roadmap</h3>
             <p className="text-xs text-slate-600">Adaptive 8-week DSA mastery plan</p>
@@ -50,8 +50,8 @@ export default function Roadmap() {
                   <p className="text-xs text-slate-600">{item.problems} problems</p>
                 </div>
 
-                {item.status === 'completed' && <span className="text-lg mt-0.5">✅</span>}
-                {item.status === 'in-progress' && <span className="text-lg mt-0.5">⚡</span>}
+                {item.status === 'completed' && <span className="text-lg mt-0.5"></span>}
+                {item.status === 'in-progress' && <span className="text-lg mt-0.5"></span>}
               </div>
             )
           })}

@@ -1,19 +1,19 @@
 const steps = [
   {
     num: '01',
-    icon: '🧩',
+    icon: '',
     title: 'Open any LeetCode problem',
     desc: 'The ThinkDSA sidebar activates automatically on any LeetCode problem page — no extra setup needed.',
   },
   {
     num: '02',
-    icon: '⚡',
+    icon: '',
     title: 'ThinkDSA Extension kicks in',
     desc: 'It reads the problem, detects the pattern category, and arms your personal AI mentor with full context.',
   },
   {
     num: '03',
-    icon: '🚀',
+    icon: '',
     title: 'Personalized Growth',
     desc: 'Get tailored hints, track mastery per pattern, and watch your thinking evolve session after session.',
   },
@@ -26,7 +26,7 @@ export default function HowItWorks() {
         {/* Header */}
         <div className="text-center mb-16">
           <span className="badge-shimmer inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-indigo-500/30 text-indigo-300 text-sm font-medium mb-5">
-            ✦ How it works
+             How it works
           </span>
           <h2 className="text-[clamp(2rem,4vw,3rem)] font-black tracking-tight leading-tight mb-4">
             Three steps to

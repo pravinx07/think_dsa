@@ -1,24 +1,24 @@
 const features = [
   {
-    icon: '💡',
+    icon: '',
     iconBg: 'bg-indigo-500/15 border border-indigo-500/25',
     title: 'Guided Hints',
     desc: 'Stuck? Get progressive, Socratic hints that guide your thinking — not the answer. Build real intuition, problem by problem.',
   },
   {
-    icon: '🧩',
+    icon: '',
     iconBg: 'bg-violet-500/15 border border-violet-500/25',
     title: 'Pattern Mastery',
     desc: 'Automatically tag every problem by pattern. Track sliding window, DP, and graph skills separately with visual dashboards.',
   },
   {
-    icon: '📈',
+    icon: '',
     iconBg: 'bg-emerald-500/12 border border-emerald-500/20',
     title: 'Progress Tracking',
     desc: 'See exactly how your mastery grows over time. Identify weak spots, review your struggles, and improve with data-backed insights.',
   },
   {
-    icon: '🤖',
+    icon: '',
     iconBg: 'bg-amber-500/12 border border-amber-500/20',
     title: 'AI Mentor',
     desc: 'An AI that knows your history. It remembers your patterns, nudges you toward first-principles thinking, and celebrates growth.',
@@ -32,7 +32,7 @@ export default function Features() {
         {/* Header */}
         <div className="text-center mb-16">
           <span className="badge-shimmer inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-indigo-500/30 text-indigo-300 text-sm font-medium mb-5">
-            ✦ Core Features
+             Core Features
           </span>
           <h2 className="text-[clamp(2rem,4vw,3rem)] font-black tracking-tight leading-tight mb-4">
             Everything you need to

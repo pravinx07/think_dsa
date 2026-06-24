@@ -13,7 +13,7 @@ export default function PatternMastery() {
   return (
     <div className="glass-card rounded-2xl p-6 mb-6">
       <div className="flex items-center gap-2 mb-6">
-        <div className="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-sm">🧩</div>
+        <div className="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-sm"></div>
         <div>
           <h3 className="text-sm font-bold text-slate-100">Pattern Mastery</h3>
           <p className="text-xs text-slate-600">Your skill level per DSA pattern</p>

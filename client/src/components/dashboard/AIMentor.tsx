@@ -12,7 +12,7 @@ export default function AIMentor() {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: "Hey! 👋 I've analyzed your progress. Let me know what you want to practice or if you need help with a problem.",
+      content: "Hey!  I've analyzed your progress. Let me know what you want to practice or if you need help with a problem.",
     }
   ])
   const [input, setInput] = useState('')
@@ -54,7 +54,7 @@ export default function AIMentor() {
     <div className="glass-card rounded-2xl flex flex-col h-[600px]">
       {/* Header */}
       <div className="flex items-center gap-3 p-5 border-b border-white/5">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-xl">🤖</div>
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center text-xl"></div>
         <div>
           <p className="text-sm font-bold text-slate-100">AI Mentor</p>
           <p className="text-xs text-slate-600">Knows your history · Personalized guidance</p>

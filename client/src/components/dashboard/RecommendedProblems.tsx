@@ -14,7 +14,7 @@ export default function RecommendedProblems() {
     <div className="glass-card rounded-2xl p-6 mb-8">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-sm">🤖</div>
+          <div className="w-8 h-8 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center text-sm"></div>
           <div>
             <h3 className="text-sm font-bold text-slate-100">Today's Recommendations</h3>
             <p className="text-xs text-slate-600">AI-picked for your growth</p>
@@ -35,8 +35,8 @@ export default function RecommendedProblems() {
             <p className="text-sm font-bold text-slate-100 mb-1 group-hover:text-indigo-300 transition-colors">{p.title}</p>
             <p className="text-xs text-slate-600 mb-3">{p.reason}</p>
             <div className="flex items-center gap-3 text-xs text-slate-500">
-              <span>🏷️ {p.pattern}</span>
-              <span>⏱️ {p.estimatedTime}</span>
+              <span>{p.pattern}</span>
+              <span>{p.estimatedTime}</span>
             </div>
           </div>
         ))}

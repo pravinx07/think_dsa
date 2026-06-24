@@ -32,13 +32,13 @@ const patternColors: Record<string, string> = {
 };
 
 const patternEmojis: Record<string, string> = {
-  'HashMap': '🗺️',
-  'Sliding Window': '🪟',
-  'Arrays': '📦',
-  'Graphs': '🌐',
-  'Dynamic Programming': '🧠',
-  'Intervals': '📏',
-  'Trees': '🌲',
+  'HashMap': '',
+  'Sliding Window': '',
+  'Arrays': '',
+  'Graphs': '',
+  'Dynamic Programming': '',
+  'Intervals': '',
+  'Trees': '',
 };
 
 export const getDashboardHome = async (req: Request, res: Response) => {
@@ -62,7 +62,7 @@ export const getDashboardHome = async (req: Request, res: Response) => {
       {
         $project: {
           name: "$_id",
-          emoji: "🧩", // Default
+          emoji: "", // Default
           mastery: { $multiply: [{ $divide: ["$solved", "$total"] }, 100] }
         }
       },
@@ -71,7 +71,7 @@ export const getDashboardHome = async (req: Request, res: Response) => {
 
     const mappedPatternStats = patternStats.map(p => ({
       ...p,
-      emoji: patternEmojis[p.name] || '🧩'
+      emoji: patternEmojis[p.name] || ''
     }));
 
     const strongAreas = mappedPatternStats.filter(p => p.mastery >= 50).slice(0, 3);

@@ -10,12 +10,12 @@ export default function DashboardHeader() {
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
       {/* Welcome */}
       <div>
-        <p className="text-slate-500 text-sm mb-1">{greeting} 👋</p>
+        <p className="text-slate-500 text-sm mb-1">{greeting} </p>
         <h1 className="text-2xl md:text-3xl font-black tracking-tight text-slate-100">
           Welcome back, <span className="text-gradient-brand">{mockUser.name}</span>
         </h1>
         <p className="text-slate-500 text-sm mt-1">
-          Keep going — you're on a <span className="text-amber-400 font-semibold">{mockUser.streak}-day streak</span> 🔥
+          Keep going — you're on a <span className="text-amber-400 font-semibold">{mockUser.streak}-day streak</span> 
         </p>
       </div>
 
@@ -27,7 +27,7 @@ export default function DashboardHeader() {
         </div>
         <div className="glass rounded-xl px-4 py-2.5 text-center">
           <p className="text-xs text-slate-600 mb-0.5">Streak</p>
-          <p className="text-sm font-bold text-amber-400">{mockUser.streak} 🔥</p>
+          <p className="text-sm font-bold text-amber-400">{mockUser.streak} </p>
         </div>
       </div>
     </div>

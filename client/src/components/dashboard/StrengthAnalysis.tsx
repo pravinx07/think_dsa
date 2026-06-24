@@ -16,7 +16,7 @@ function AreaCard({ name, emoji, mastery, isStrong }: { name: string; emoji: str
           />
         </div>
       </div>
-      <span className="text-base">{isStrong ? '✅' : '❌'}</span>
+      <span className="text-base">{isStrong ? '' : ''}</span>
     </div>
   )
 }
@@ -31,7 +31,7 @@ export default function StrengthAnalysis() {
       {/* Strong Areas */}
       <div className="glass-card rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-5">
-          <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-sm">💪</div>
+          <div className="w-8 h-8 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-sm"></div>
           <div>
             <h3 className="text-sm font-bold text-slate-100">Strong Areas</h3>
             <p className="text-xs text-slate-600">Mastery &gt; 60%</p>
@@ -45,7 +45,7 @@ export default function StrengthAnalysis() {
       {/* Weak Areas */}
       <div className="glass-card rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-5">
-          <div className="w-8 h-8 rounded-xl bg-red-500/15 border border-red-500/25 flex items-center justify-center text-sm">🎯</div>
+          <div className="w-8 h-8 rounded-xl bg-red-500/15 border border-red-500/25 flex items-center justify-center text-sm"></div>
           <div>
             <h3 className="text-sm font-bold text-slate-100">Weak Areas</h3>
             <p className="text-xs text-slate-600">Needs practice</p>
