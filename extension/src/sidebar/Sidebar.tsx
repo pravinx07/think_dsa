@@ -1,5 +1,8 @@
 import { useEffect, useState, useRef } from "react";
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Brain, X, Loader2, Sparkles, Send, Network, Code2, Activity, Timer, Play, Compass, BarChart } from "lucide-react";
 
 type Message = {
@@ -390,8 +393,34 @@ export default function Sidebar() {
                   : "bg-zinc-800/80 text-zinc-200 rounded-bl-none border border-zinc-700/50"
               }`}
             >
-              <div className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-zinc-900/50 prose-pre:border prose-pre:border-zinc-700/50">
-                <ReactMarkdown>{msg.text}</ReactMarkdown>
+              <div className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed prose-pre:bg-zinc-900/50 prose-pre:border prose-pre:border-zinc-700/50 whitespace-pre-wrap break-words">
+                {msg.role === "user" ? (
+                  msg.text
+                ) : (
+                  <ReactMarkdown
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      code({ node, inline, className, children, ...props }: any) {
+                        const match = /language-(\w+)/.exec(className || "");
+                        return !inline && match ? (
+                          <SyntaxHighlighter
+                            {...props}
+                            children={String(children).replace(/\n$/, "")}
+                            style={vscDarkPlus as any}
+                            language={match[1]}
+                            PreTag="div"
+                          />
+                        ) : (
+                          <code {...props} className={className}>
+                            {children}
+                          </code>
+                        );
+                      },
+                    }}
+                  >
+                    {msg.text}
+                  </ReactMarkdown>
+                )}
               </div>
             </div>
           </div>
@@ -416,13 +445,22 @@ export default function Sidebar() {
           }}
           className="flex gap-2"
         >
-          <input
-            type="text"
+          <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                if (input.trim() && !loading && !(timeLeft > 0 && messages.length === 0)) {
+                  sendMessage(input);
+                }
+              }
+            }}
             disabled={timeLeft > 0 && messages.length === 0}
             placeholder={timeLeft > 0 && messages.length === 0 ? "Timer active. Keep thinking!" : "Ask a question..."}
-            className="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-white placeholder-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all text-white placeholder-zinc-500 disabled:opacity-50 disabled:cursor-not-allowed resize-none max-h-32"
+            rows={1}
+            style={{ minHeight: '46px' }}
           />
           <button
             type="submit"
