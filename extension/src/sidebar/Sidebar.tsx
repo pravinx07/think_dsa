@@ -3,11 +3,17 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Brain, X, Loader2, Sparkles, Send, Network, Code2, Activity, Timer, Play, Compass, BarChart, Wand2, FileText } from "lucide-react";
+import { Brain, X, Loader2, Sparkles, Send, Network, Code2, Activity, Timer, Play, Compass, BarChart, Wand2, FileText, ChevronLeft, ChevronRight, Cpu } from "lucide-react";
 
 type Message = {
   role: "user" | "ai";
   text: string;
+};
+
+type DryRunStep = {
+  line: string;
+  variables: Record<string, string>;
+  note: string;
 };
 
 export default function Sidebar() {
@@ -19,9 +25,16 @@ export default function Sidebar() {
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const [activeTab, setActiveTab] = useState<"chat" | "scratchpad" | "dashboard">("chat");
+  const [activeTab, setActiveTab] = useState<"chat" | "scratchpad" | "dashboard" | "visualizer">("chat");
   const [scratchpadText, setScratchpadText] = useState("");
   const [problemStats, setProblemStats] = useState<Record<string, { hints: number }>>({});
+
+  // Dry Run Visualizer state
+  const [dryrunSteps, setDryrunSteps] = useState<DryRunStep[]>([]);
+  const [dryrunCurrentStep, setDryrunCurrentStep] = useState(0);
+  const [dryrunTestInput, setDryrunTestInput] = useState("");
+  const [dryrunResult, setDryrunResult] = useState("");
+  const [dryrunError, setDryrunError] = useState("");
 
   useEffect(() => {
     if (problemTitle && problemTitle !== "Loading...") {
@@ -227,6 +240,55 @@ export default function Sidebar() {
     }
   }
 
+  async function triggerDryRunVisual() {
+    const lineElements = document.querySelectorAll('.view-lines .view-line');
+    if (lineElements.length === 0) {
+      setDryrunError("Couldn't find code in the editor. Make sure the LeetCode code panel is open.");
+      setActiveTab("visualizer");
+      return;
+    }
+    const code = Array.from(lineElements).map(el => el.textContent).join('\n');
+
+    // Reset visualizer state
+    setDryrunSteps([]);
+    setDryrunCurrentStep(0);
+    setDryrunResult("");
+    setDryrunError("");
+    setDryrunTestInput("");
+    setLoading(true);
+    setActiveTab("visualizer");
+
+    try {
+      const response = await fetch("http://localhost:5000/dryrun-visual", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ problemTitle, code }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        setDryrunError(err.error ?? "Server error. Please try again.");
+        return;
+      }
+
+      const data = await response.json();
+
+      if (!Array.isArray(data.steps) || data.steps.length === 0) {
+        setDryrunError("AI returned an empty trace. Please try again.");
+        return;
+      }
+
+      setDryrunSteps(data.steps);
+      setDryrunResult(data.result ?? "");
+      setDryrunTestInput(data.testInput ?? "");
+    } catch (error) {
+      console.error(error);
+      setDryrunError("Network error. Is the server running at localhost:5000?");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   if (!isOpen) {
     return (
       <button
@@ -277,9 +339,15 @@ export default function Sidebar() {
         </button>
         <button 
           onClick={() => setActiveTab("dashboard")}
-          className={`flex-1 py-3 text-sm font-medium transition-colors ${activeTab === 'dashboard' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900/20'}`}
+          className={`flex-1 py-2.5 text-xs font-medium transition-colors ${activeTab === 'dashboard' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900/20'}`}
         >
           Dashboard
+        </button>
+        <button 
+          onClick={() => setActiveTab("visualizer")}
+          className={`flex-1 py-2.5 text-xs font-medium transition-colors ${activeTab === 'visualizer' ? 'text-indigo-400 border-b-2 border-indigo-500' : 'text-zinc-400 hover:text-zinc-200 bg-zinc-900/20'}`}
+        >
+          Visualizer
         </button>
       </div>
 
@@ -303,6 +371,159 @@ export default function Sidebar() {
             className="flex-1 w-full bg-transparent resize-none text-zinc-300 font-mono text-sm focus:outline-none placeholder-zinc-700"
             spellCheck={false}
           />
+        </div>
+      ) : activeTab === "visualizer" ? (
+        <div className="flex-1 flex flex-col p-4 bg-zinc-950 overflow-y-auto">
+          <div className="flex items-center gap-2 mb-4 border-b border-zinc-800 pb-3">
+            <Cpu className="w-5 h-5 text-sky-400" />
+            <h2 className="text-base font-bold text-white">Dry Run Visualizer</h2>
+          </div>
+
+          {/* Empty / Launch state */}
+          {!loading && dryrunSteps.length === 0 && !dryrunError && (
+            <div className="flex flex-col items-center justify-center flex-1 gap-4 text-center">
+              <Cpu className="w-12 h-12 text-sky-400/40" />
+              <p className="text-zinc-400 text-sm max-w-[260px]">
+                Click <strong className="text-sky-400">"Visualize"</strong> in the Chat tab toolbar to
+                auto-trace your code step-by-step.
+              </p>
+              <button
+                onClick={triggerDryRunVisual}
+                disabled={loading}
+                className="bg-sky-600 hover:bg-sky-700 text-white text-sm px-5 py-2.5 rounded-xl flex items-center gap-2 font-medium transition-all shadow-lg shadow-sky-500/20"
+              >
+                <Play className="w-4 h-4" />
+                Start Visualizer
+              </button>
+            </div>
+          )}
+
+          {/* Loading state */}
+          {loading && (
+            <div className="flex flex-col items-center justify-center flex-1 gap-3">
+              <Loader2 className="w-8 h-8 animate-spin text-sky-400" />
+              <p className="text-zinc-400 text-sm">Simulating your code...</p>
+            </div>
+          )}
+
+          {/* Error state */}
+          {dryrunError && (
+            <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-sm text-red-400">
+              <p className="font-semibold mb-1">Error</p>
+              <p>{dryrunError}</p>
+              <button
+                onClick={triggerDryRunVisual}
+                className="mt-3 text-xs bg-red-600 hover:bg-red-700 text-white px-3 py-1.5 rounded-lg transition-all"
+              >
+                Retry
+              </button>
+            </div>
+          )}
+
+          {/* Visualizer content */}
+          {!loading && dryrunSteps.length > 0 && (
+            <div className="flex flex-col gap-4">
+              {/* Test input */}
+              {dryrunTestInput && (
+                <div className="bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-3">
+                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Test Input</p>
+                  <p className="text-sm font-mono text-emerald-400">{dryrunTestInput}</p>
+                </div>
+              )}
+
+              {/* Step navigator */}
+              <div className="flex items-center justify-between gap-2">
+                <button
+                  onClick={() => setDryrunCurrentStep(s => Math.max(0, s - 1))}
+                  disabled={dryrunCurrentStep === 0}
+                  className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 disabled:opacity-30 transition-all"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <div className="flex-1 text-center">
+                  <span className="text-xs text-zinc-400">Step </span>
+                  <span className="text-sm font-bold text-white">{dryrunCurrentStep + 1}</span>
+                  <span className="text-xs text-zinc-400"> / {dryrunSteps.length}</span>
+                </div>
+                <button
+                  onClick={() => setDryrunCurrentStep(s => Math.min(dryrunSteps.length - 1, s + 1))}
+                  disabled={dryrunCurrentStep === dryrunSteps.length - 1}
+                  className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 disabled:opacity-30 transition-all"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Progress bar */}
+              <div className="w-full bg-zinc-800 rounded-full h-1.5">
+                <div
+                  className="bg-sky-500 h-1.5 rounded-full transition-all duration-300"
+                  style={{ width: `${((dryrunCurrentStep + 1) / dryrunSteps.length) * 100}%` }}
+                />
+              </div>
+
+              {/* Current step card */}
+              {(() => {
+                const step = dryrunSteps[dryrunCurrentStep];
+                return (
+                  <div className="bg-zinc-900/80 border border-zinc-700/50 rounded-xl overflow-hidden">
+                    {/* Code line */}
+                    <div className="bg-zinc-800/80 px-4 py-2.5 border-b border-zinc-700/50">
+                      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Executing Line</p>
+                      <code className="text-sm font-mono text-yellow-300 break-all">{step.line}</code>
+                    </div>
+
+                    {/* Variables table */}
+                    <div className="px-4 py-3">
+                      <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-2">Variables</p>
+                      {Object.keys(step.variables).length === 0 ? (
+                        <p className="text-xs text-zinc-600 italic">No variables changed.</p>
+                      ) : (
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="text-left">
+                              <th className="text-zinc-500 font-medium text-xs pb-2 pr-4">Name</th>
+                              <th className="text-zinc-500 font-medium text-xs pb-2">Value</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {Object.entries(step.variables).map(([k, v]) => (
+                              <tr key={k} className="border-t border-zinc-800">
+                                <td className="py-1.5 pr-4 font-mono text-indigo-300 text-xs">{k}</td>
+                                <td className="py-1.5 font-mono text-emerald-300 text-xs break-all">{v}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      )}
+                    </div>
+
+                    {/* Note */}
+                    <div className="bg-sky-500/5 border-t border-sky-500/20 px-4 py-2.5">
+                      <p className="text-xs text-sky-300">{step.note}</p>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Final result */}
+              {dryrunCurrentStep === dryrunSteps.length - 1 && dryrunResult && (
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-4 py-3">
+                  <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mb-1">Final Result</p>
+                  <p className="text-sm font-mono text-emerald-400">{dryrunResult}</p>
+                </div>
+              )}
+
+              {/* Restart button */}
+              <button
+                onClick={triggerDryRunVisual}
+                disabled={loading}
+                className="w-full text-xs text-zinc-400 hover:text-sky-400 border border-zinc-800 hover:border-sky-500/30 py-2 rounded-xl transition-all"
+              >
+                ↺ Run Again
+              </button>
+            </div>
+          )}
         </div>
       ) : activeTab === "dashboard" ? (
         <div className="flex-1 flex flex-col p-5 bg-zinc-950 overflow-y-auto">
@@ -386,12 +607,12 @@ export default function Sidebar() {
             <span className="text-[9px] font-medium uppercase tracking-wider">Big-O</span>
           </button>
           <button 
-            onClick={() => triggerAction("dryrun")}
+            onClick={triggerDryRunVisual}
             className="flex flex-col items-center justify-center gap-1 bg-zinc-800/50 hover:bg-sky-500/20 text-zinc-300 hover:text-sky-400 border border-zinc-700/50 hover:border-sky-500/30 rounded-xl py-2 transition-all"
-            title="Dry Run"
+            title="Dry Run Visualizer"
           >
-            <Play className="w-4 h-4" />
-            <span className="text-[9px] font-medium uppercase tracking-wider">Dry Run</span>
+            <Cpu className="w-4 h-4" />
+            <span className="text-[9px] font-medium uppercase tracking-wider">Visualize</span>
           </button>
           <button 
             onClick={() => triggerAction("refactor")}

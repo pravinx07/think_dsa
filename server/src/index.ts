@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import hintRoute from "./routes/hint.route.js";
 import dashboardRoute from "./routes/dashboard.route.js";
 import mentorRoute from "./routes/mentor.route.js";
+import dryrunRoute from "./routes/dryrun.route.js";
 import { clerkMiddleware } from '@clerk/express';
 import { connectDB } from './config/db.js';
 
@@ -20,6 +21,7 @@ app.use(clerkMiddleware());
 app.use("/hint", hintRoute);
 app.use("/api/dashboard", dashboardRoute);
 app.use("/api/mentor", mentorRoute);
+app.use("/dryrun-visual", dryrunRoute);
 
 app.get("/api/protected", (req, res) => {
     res.json({ message: "You are authenticated!" });
