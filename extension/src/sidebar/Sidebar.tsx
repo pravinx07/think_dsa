@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Brain, X, Loader2, Sparkles, Send, Network, Code2, Activity, Timer, Play, Compass, BarChart } from "lucide-react";
+import { Brain, X, Loader2, Sparkles, Send, Network, Code2, Activity, Timer, Play, Compass, BarChart, Wand2 } from "lucide-react";
 
 type Message = {
   role: "user" | "ai";
@@ -127,9 +127,9 @@ export default function Sidebar() {
     }
   }
 
-  async function triggerAction(action: "hint" | "pattern" | "review" | "complexity" | "dryrun" | "stepdown") {
+  async function triggerAction(action: "hint" | "pattern" | "review" | "complexity" | "dryrun" | "stepdown" | "refactor") {
     let code = "";
-    if (action === "review" || action === "complexity" || action === "dryrun") {
+    if (action === "review" || action === "complexity" || action === "dryrun" || action === "refactor") {
       const lineElements = document.querySelectorAll('.view-lines .view-line');
       if (lineElements.length === 0) {
         setMessages([...messages, { role: "ai", text: "I couldn't find your code. Make sure the editor is open and has code." }]);
@@ -146,6 +146,7 @@ export default function Sidebar() {
     if (action === "complexity") userMsg = "Analyze the time and space complexity of my code.";
     if (action === "dryrun") userMsg = "Help me dry run my code step-by-step with a test case.";
     if (action === "stepdown") userMsg = "I am completely lost. Can you recommend 1-2 easier foundational problems I should solve first?";
+    if (action === "refactor") userMsg = "Make my code Pro (Refactor to FAANG standards).";
 
     // Track hint count for generic hints and patterns
     if (action === "hint" || action === "pattern" || action === "stepdown") {
@@ -302,7 +303,7 @@ export default function Sidebar() {
         </div>
         
         {/* Action Toolbar */}
-        <div className="grid grid-cols-5 gap-2 mt-2">
+        <div className="grid grid-cols-6 gap-2 mt-2">
           <button 
             onClick={() => triggerAction("pattern")}
             disabled={timeLeft > 0}
@@ -343,6 +344,14 @@ export default function Sidebar() {
           >
             <Play className="w-4 h-4" />
             <span className="text-[9px] font-medium uppercase tracking-wider">Dry Run</span>
+          </button>
+          <button 
+            onClick={() => triggerAction("refactor")}
+            className="flex flex-col items-center justify-center gap-1 bg-zinc-800/50 hover:bg-purple-500/20 text-zinc-300 hover:text-purple-400 border border-zinc-700/50 hover:border-purple-500/30 rounded-xl py-2 transition-all"
+            title="Make it Pro"
+          >
+            <Wand2 className="w-4 h-4" />
+            <span className="text-[9px] font-medium uppercase tracking-wider">Pro</span>
           </button>
         </div>
       </div>
@@ -449,6 +458,7 @@ export default function Sidebar() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {
+              if (e.nativeEvent.isComposing || e.keyCode === 229) return;
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 if (input.trim() && !loading && !(timeLeft > 0 && messages.length === 0)) {
