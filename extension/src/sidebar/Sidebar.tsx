@@ -3,7 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Brain, X, Loader2, Sparkles, Send, Network, Code2, Activity, Timer, Play, Compass, BarChart, Wand2 } from "lucide-react";
+import { Brain, X, Loader2, Sparkles, Send, Network, Code2, Activity, Timer, Play, Compass, BarChart, Wand2, FileText } from "lucide-react";
 
 type Message = {
   role: "user" | "ai";
@@ -189,6 +189,44 @@ export default function Sidebar() {
     }
   }
 
+  async function generateNotes() {
+    let code = "";
+    const lineElements = document.querySelectorAll('.view-lines .view-line');
+    if (lineElements.length === 0) {
+      setMessages([...messages, { role: "ai", text: "I couldn't find your code. Make sure the editor is open and has code." }]);
+      setActiveTab("chat");
+      return;
+    }
+    code = Array.from(lineElements).map(el => el.textContent).join('\n');
+
+    setLoading(true);
+    // Switch to scratchpad tab so they can see it happening
+    setActiveTab("scratchpad");
+
+    try {
+      const response = await fetch("http://localhost:5000/hint", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          problemTitle,
+          action: "notes",
+          code,
+          messages: [],
+        }),
+      });
+      const data = await response.json();
+      const notes = data.hint;
+      
+      const newScratchpadText = scratchpadText + (scratchpadText ? "\n\n" : "") + "### AI Generated Notes\n" + notes;
+      setScratchpadText(newScratchpadText);
+      chrome.storage.local.set({ [`scratchpad_${problemTitle}`]: newScratchpadText });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   if (!isOpen) {
     return (
       <button
@@ -247,7 +285,17 @@ export default function Sidebar() {
 
       {activeTab === "scratchpad" ? (
         <div className="flex-1 flex flex-col p-4 bg-zinc-950">
-          <p className="text-xs text-zinc-500 mb-2">Use this space to trace algorithms, write pseudocode, or jot down ideas. Auto-saves locally.</p>
+          <div className="flex justify-between items-start mb-3 gap-2">
+            <p className="text-xs text-zinc-500">Use this space to trace algorithms, write pseudocode, or jot down ideas. Auto-saves locally.</p>
+            <button 
+              onClick={generateNotes} 
+              disabled={loading} 
+              className="text-xs bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-1.5 whitespace-nowrap disabled:opacity-50 transition-all shadow-md shadow-indigo-500/20"
+            >
+              {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileText className="w-3 h-3" />}
+              {loading ? "Generating..." : "Auto-Notes"}
+            </button>
+          </div>
           <textarea
             value={scratchpadText}
             onChange={handleScratchpadChange}

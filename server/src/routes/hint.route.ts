@@ -44,6 +44,8 @@ router.post("/", async (req, res) => {
          initialPrompt += `I am completely lost on this problem. Please identify the core foundational concept (e.g., Two Pointers, BFS, etc.) and recommend 1 or 2 specific, easier LeetCode problems I should solve first to build my intuition before attempting this one. Explain WHY those problems help.`;
       } else if (action === "refactor") {
          initialPrompt += `Please refactor my working code to make it professional (FAANG-level quality):\n\n${code}\n\nProvide the fully refactored code and a brief explanation of what you changed (e.g., variable names, early returns, removing redundant logic).`;
+      } else if (action === "notes") {
+         initialPrompt += `Generate Notion-style markdown notes for my accepted solution:\n\n${code}\n\nPlease include:\n1. Time and Space Complexity.\n2. Core Pattern used.\n3. Key takeaways or 'Gotchas'.\nFormat it beautifully with headings and bullet points so I can save it to my study log. Do not output conversational filler, just the notes.`;
       } else {
          initialPrompt += "Give first hint.";
       }
