@@ -6,7 +6,11 @@ import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
 
 dotenv.config();
-const ai = new GoogleGenAI({ apiKey: process.env.GOOGLE_API_KEY! });
+const googleApiKey = process.env.GOOGLE_API_KEY;
+if (!googleApiKey) {
+  throw new Error('GOOGLE_API_KEY is not set. Aborting server startup.');
+}
+const ai = new GoogleGenAI({ apiKey: googleApiKey });
 
 // Helper to get or create user
 const getOrCreateUser = async (clerkId: string) => {
@@ -172,6 +176,9 @@ export const getHistory = async (req: Request, res: Response) => {
 
 export const getTargetedProblems = async (req: Request, res: Response) => {
   try {
+    const { userId } = getAuth(req);
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
     const { pattern } = req.query;
 
     // Validate input
@@ -220,9 +227,14 @@ Rules:
       return res.status(500).json({ error: 'AI returned unexpected format. Please try again.' });
     }
 
-    // Validate each problem has required fields
+    // Validate each problem has required fields and an allowed difficulty
+    const allowedDifficulties = new Set(['Easy', 'Medium']);
     const valid = problems.filter(
-      (p: any) => typeof p.title === 'string' && typeof p.url === 'string' && typeof p.difficulty === 'string'
+      (p: any) =>
+        typeof p.title === 'string' &&
+        typeof p.url === 'string' &&
+        typeof p.difficulty === 'string' &&
+        allowedDifficulties.has(p.difficulty)
     ).slice(0, 3); // max 3
 
     return res.json({ pattern: safePattern, problems: valid });

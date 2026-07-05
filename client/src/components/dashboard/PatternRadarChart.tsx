@@ -210,6 +210,7 @@ export default function PatternRadarChart() {
                           <button
                             onClick={() => {
                               setTargetStates(prev => ({ ...prev, [weak.name]: { loading: false, error: null, problems: [] } }))
+                              fetchProblems(weak.name)
                             }}
                             className="ml-2 underline hover:no-underline"
                           >
