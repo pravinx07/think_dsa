@@ -5,6 +5,7 @@ import StrengthAnalysis from '../../components/dashboard/StrengthAnalysis'
 import RecommendedProblems from '../../components/dashboard/RecommendedProblems'
 import RecentActivity from '../../components/dashboard/RecentActivity'
 import EmptyState from '../../components/dashboard/EmptyState'
+import DailyReview from '../../components/dashboard/DailyReview'
 
 export default function DashboardHome() {
   const { data, loading, error } = useData()
@@ -23,6 +24,7 @@ export default function DashboardHome() {
     <div>
       <DashboardHeader />
       <StatsCards />
+      <DailyReview />
       <StrengthAnalysis />
       <RecommendedProblems />
       <RecentActivity />
