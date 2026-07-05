@@ -19,7 +19,7 @@ function computeNextReview(stage: number, result: 'easy' | 'hard' | 'failed'): {
     nextStage = 0;
   }
 
-  const daysUntilNext = SRS_INTERVALS[nextStage];
+  const daysUntilNext = SRS_INTERVALS[nextStage] ?? 1;
   const nextDate = new Date();
   nextDate.setDate(nextDate.getDate() + daysUntilNext);
   nextDate.setHours(0, 0, 0, 0); // Start of that day
