@@ -24,7 +24,7 @@ export default function RecommendedProblems() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {mockRecommendedProblems.map((p) => (
+        {mockRecommendedProblems.map((p: any) => (
           <div key={p.id} className="glass rounded-xl p-4 hover:border-indigo-500/30 hover:bg-indigo-500/5 transition-all duration-200 cursor-pointer group">
             <div className="flex items-start justify-between mb-3">
               <span className="text-2xl">{p.emoji}</span>

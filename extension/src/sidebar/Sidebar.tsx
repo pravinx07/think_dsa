@@ -1,9 +1,9 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { Brain, X, Loader2, Sparkles, Send, Network, Code2, Activity, Timer, Play, Compass, BarChart, Wand2, FileText, ChevronLeft, ChevronRight, Cpu } from "lucide-react";
+import { Brain, X, Loader2, Sparkles, Send, Network, Code2, Activity, Timer, Play, Compass, BarChart, Wand2, FileText, ChevronLeft, ChevronRight, Cpu, Briefcase, Flag } from "lucide-react";
 
 type Message = {
   role: "user" | "ai";
@@ -35,6 +35,17 @@ export default function Sidebar() {
   const [dryrunTestInput, setDryrunTestInput] = useState("");
   const [dryrunResult, setDryrunResult] = useState("");
   const [dryrunError, setDryrunError] = useState("");
+
+  // Interview Mode state
+  const INTERVIEW_DURATION = 45 * 60; // 45 minutes in seconds
+  const [interviewActive, setInterviewActive] = useState(false);
+  const [interviewMessages, setInterviewMessages] = useState<Message[]>([]);
+  const [interviewInput, setInterviewInput] = useState("");
+  const [interviewLoading, setInterviewLoading] = useState(false);
+  const [interviewTimeLeft, setInterviewTimeLeft] = useState(INTERVIEW_DURATION);
+  const [interviewEnded, setInterviewEnded] = useState(false);
+  const interviewTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const interviewEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (problemTitle && problemTitle !== "Loading...") {
@@ -289,6 +300,94 @@ export default function Sidebar() {
     }
   }
 
+  // ─── Interview Mode Functions ─────────────────────────────────────────────
+  async function startInterview() {
+    setInterviewMessages([]);
+    setInterviewInput("");
+    setInterviewEnded(false);
+    setInterviewTimeLeft(INTERVIEW_DURATION);
+    setInterviewActive(true);
+    setInterviewLoading(true);
+
+    // Start countdown
+    if (interviewTimerRef.current) clearInterval(interviewTimerRef.current);
+    interviewTimerRef.current = setInterval(() => {
+      setInterviewTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(interviewTimerRef.current!);
+          setInterviewEnded(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    try {
+      const res = await fetch("http://localhost:5000/interview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ problemTitle, messages: [] }),
+      });
+      const data = await res.json();
+      setInterviewMessages([{ role: "ai", text: data.reply }]);
+    } catch (e) {
+      setInterviewMessages([{ role: "ai", text: "Could not connect to server. Is it running at localhost:5000?" }]);
+    } finally {
+      setInterviewLoading(false);
+    }
+  }
+
+  function stopInterview() {
+    if (interviewTimerRef.current) clearInterval(interviewTimerRef.current);
+    setInterviewActive(false);
+    setInterviewEnded(false);
+    setInterviewMessages([]);
+    setInterviewTimeLeft(INTERVIEW_DURATION);
+  }
+
+  async function sendInterviewMessage(text: string) {
+    if (!text.trim() || interviewLoading || interviewEnded) return;
+    const newMessages: Message[] = [...interviewMessages, { role: "user", text }];
+    setInterviewMessages(newMessages);
+    setInterviewInput("");
+    setInterviewLoading(true);
+
+    // Auto-scroll
+    setTimeout(() => interviewEndRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+
+    try {
+      const res = await fetch("http://localhost:5000/interview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ problemTitle, messages: newMessages }),
+      });
+      const data = await res.json();
+      const reply = data.reply ?? data.error ?? "No response.";
+      setInterviewMessages(prev => [...prev, { role: "ai", text: reply }]);
+    } catch {
+      setInterviewMessages(prev => [...prev, { role: "ai", text: "Network error. Please try again." }]);
+    } finally {
+      setInterviewLoading(false);
+      setTimeout(() => interviewEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    }
+  }
+
+  async function requestFeedback() {
+    await sendInterviewMessage("I'm done with my solution. Please give me structured feedback.");
+  }
+
+  const formatInterviewTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
+
+  const interviewTimerColor = interviewTimeLeft < 300
+    ? "text-red-400"
+    : interviewTimeLeft < 600
+    ? "text-amber-400"
+    : "text-emerald-400";
+
   if (!isOpen) {
     return (
       <button
@@ -307,22 +406,156 @@ export default function Sidebar() {
     return "text-zinc-400 bg-zinc-800";
   };
 
+  // ── INTERVIEW MODE: early return with dedicated UI ──────────────────────────
+  if (interviewActive) {
+    const outerCls = "fixed right-4 top-4 bottom-4 w-[450px] text-white z-[999999] rounded-2xl flex flex-col transition-all duration-300 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden bg-zinc-950 border border-red-900/50";
+    const feedbackBtnCls = "w-full py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white text-sm font-semibold rounded-xl flex items-center justify-center gap-2 transition-all";
+    const sendBtnCls = "bg-red-600 hover:bg-red-700 disabled:bg-zinc-800 disabled:text-zinc-500 text-white p-2.5 rounded-xl transition-all flex items-center justify-center";
+
+    return (
+      <div className={outerCls}>
+        {/* Header */}
+        <div className="flex items-center justify-between px-4 py-3 border-b border-red-900/40 bg-red-950/30">
+          <h1 className="text-base font-bold flex items-center gap-2">
+            <Briefcase className="w-5 h-5 text-red-400" />
+            <span className="text-red-300">Interview Mode</span>
+          </h1>
+          <div className="flex items-center gap-2">
+            <div className={"flex items-center gap-1.5 font-mono text-sm font-bold " + interviewTimerColor}>
+              <Timer className="w-4 h-4" />
+              {formatInterviewTime(interviewTimeLeft)}
+            </div>
+            <button
+              onClick={stopInterview}
+              className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-red-600/80 hover:bg-red-600 text-white transition-all"
+            >
+              <Briefcase className="w-3.5 h-3.5" />
+              End
+            </button>
+            <button onClick={() => setIsOpen(false)} className="text-zinc-400 hover:text-white bg-zinc-800/50 hover:bg-zinc-700 p-1.5 rounded-full transition-colors">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Status bar */}
+        <div className="flex items-center justify-between px-4 py-2 bg-red-950/20 border-b border-red-900/20">
+          <p className="text-xs text-red-300 truncate font-medium">📋 {problemTitle}</p>
+          {interviewEnded
+            ? <span className="text-xs text-red-400 font-bold animate-pulse">⏰ Time's up!</span>
+            : <span className="text-[10px] text-zinc-500">Hints & pattern names are off-limits</span>
+          }
+        </div>
+
+        {/* Time's up banner */}
+        {interviewEnded && (
+          <div className="bg-red-900/30 border-b border-red-800/50 px-4 py-3 text-center">
+            <p className="text-sm font-bold text-red-300">⏰ 45 minutes are up!</p>
+            <p className="text-xs text-zinc-400 mt-0.5">Click "Get Feedback" to receive your evaluation.</p>
+          </div>
+        )}
+
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {interviewMessages.length === 0 && interviewLoading && (
+            <div className="flex justify-start">
+              <div className="bg-zinc-800/80 rounded-2xl rounded-bl-none border border-zinc-700/50 px-4 py-3 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-red-400" />
+                <span className="text-sm text-zinc-400">Interviewer is joining...</span>
+              </div>
+            </div>
+          )}
+
+          {interviewMessages.map((msg, idx) => {
+            const isUser = msg.role === 'user';
+            const bubbleCls = isUser
+              ? 'max-w-[88%] rounded-2xl rounded-br-none p-3 text-sm bg-zinc-700/60 text-zinc-100 border border-zinc-600/50'
+              : 'max-w-[88%] rounded-2xl rounded-bl-none p-3 text-sm bg-red-950/40 text-zinc-200 border border-red-900/40';
+            return (
+              <div key={idx} className={isUser ? 'flex justify-end' : 'flex justify-start'}>
+                <div className={bubbleCls}>
+                  <div className="prose prose-invert prose-sm max-w-none prose-p:leading-relaxed break-words">
+                    {isUser ? msg.text : (
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}
+                        components={{
+                          code({ inline, className, children, ...props }: any) {
+                            const match = /language-(\w+)/.exec(className || "");
+                            return !inline && match
+                              ? <SyntaxHighlighter {...props} children={String(children).replace(/\n$/, "")} style={vscDarkPlus as any} language={match[1]} PreTag="div" />
+                              : <code {...props} className={className}>{children}</code>;
+                          },
+                        }}
+                      >{msg.text}</ReactMarkdown>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+
+          {interviewLoading && interviewMessages.length > 0 && (
+            <div className="flex justify-start">
+              <div className="bg-red-950/40 border border-red-900/40 rounded-2xl rounded-bl-none px-4 py-3 flex items-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-red-400" />
+                <span className="text-sm text-zinc-400">Thinking...</span>
+              </div>
+            </div>
+          )}
+          <div ref={interviewEndRef} />
+        </div>
+
+        {/* Input */}
+        <div className="p-3 border-t border-red-900/30 bg-zinc-900/50 space-y-2">
+          {interviewEnded && (
+            <button onClick={requestFeedback} disabled={interviewLoading} className={feedbackBtnCls}>
+              <Flag className="w-4 h-4" />
+              Get Structured Feedback
+            </button>
+          )}
+          <form onSubmit={(e) => { e.preventDefault(); sendInterviewMessage(interviewInput); }} className="flex gap-2">
+            <textarea
+              value={interviewInput}
+              onChange={(e) => setInterviewInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.nativeEvent.isComposing || e.keyCode === 229) return;
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendInterviewMessage(interviewInput); }
+              }}
+              disabled={interviewLoading || interviewEnded}
+              placeholder={interviewEnded ? "Time's up! Get feedback above." : "Speak to the interviewer... (Enter to send)"}
+              rows={1}
+              className="flex-1 bg-zinc-950 border border-zinc-700 focus:border-red-700/60 rounded-xl px-3 py-2.5 text-sm focus:outline-none transition-all text-white placeholder-zinc-600 disabled:opacity-40 resize-none"
+              style={{ minHeight: '42px', maxHeight: '100px' }}
+            />
+            <button type="submit" disabled={!interviewInput.trim() || interviewLoading || interviewEnded} className={sendBtnCls}>
+              <Send className="w-4 h-4" />
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed right-4 top-4 bottom-4 w-[450px] bg-zinc-950/95 backdrop-blur-2xl text-white z-[999999] border border-zinc-800 rounded-2xl flex flex-col transition-all duration-300 shadow-[0_0_50px_rgba(0,0,0,0.5)] overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between p-5 border-b border-zinc-800/50 bg-zinc-900/30">
-        <h1 className="text-xl font-bold flex items-center gap-2">
-          <Brain className="w-6 h-6 text-indigo-500" />
+      <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-800/50 bg-zinc-900/30">
+        <h1 className="text-base font-bold flex items-center gap-2">
+          <Brain className="w-5 h-5 text-indigo-500" />
           ThinkDSA
         </h1>
-        <button
-          onClick={() => setIsOpen(false)}
-          className="text-zinc-400 hover:text-white transition-colors bg-zinc-800/50 hover:bg-zinc-700 p-2 rounded-full"
-        >
-          <X className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={startInterview}
+            className="flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-lg bg-zinc-800/60 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700/50 transition-all"
+          >
+            <Briefcase className="w-3.5 h-3.5" />
+            Interview
+          </button>
+          <button onClick={() => setIsOpen(false)} className="text-zinc-400 hover:text-white bg-zinc-800/50 hover:bg-zinc-700 p-1.5 rounded-full transition-colors">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
-
       {/* Tabs */}
       <div className="flex border-b border-zinc-800/50 bg-zinc-900/50">
         <button 

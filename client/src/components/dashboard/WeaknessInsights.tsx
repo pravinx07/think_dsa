@@ -30,7 +30,7 @@ export default function WeaknessInsights() {
       </div>
 
       <div className="space-y-3">
-        {mockWeaknessInsights.map((insight) => (
+        {mockWeaknessInsights.map((insight: any) => (
           <div key={insight.issue} className="flex items-start gap-3 p-4 glass rounded-xl">
             <div className="w-2 h-2 rounded-full bg-red-400 mt-2 shrink-0" />
             <div className="flex-1">

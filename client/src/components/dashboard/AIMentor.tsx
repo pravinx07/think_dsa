@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useApi } from '../../hooks/useApi'
 import { useData } from '../../contexts/DataContext'
 
@@ -38,7 +38,7 @@ export default function AIMentor() {
         method: 'POST',
         body: JSON.stringify({ 
           message: msg,
-          context: { level: mockUser.level, weakAreas: mockWeakAreas.map(a => a.name).join(', ') }
+          context: { level: mockUser.level, weakAreas: mockWeakAreas.map((a: any) => a.name).join(', ') }
         })
       });
       setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
@@ -69,7 +69,7 @@ export default function AIMentor() {
       <div className="px-5 py-3 border-b border-white/5 bg-white/[0.01]">
         <p className="text-xs text-slate-600">
           Mentor knows: <span className="text-slate-400">Level: {mockUser.level}</span>
-          {' · '}<span className="text-slate-400">Weak: {mockWeakAreas.map(a => a.name).join(', ')}</span>
+          {' · '}<span className="text-slate-400">Weak: {mockWeakAreas.map((a: any) => a.name).join(', ')}</span>
           {' · '}<span className="text-slate-400">Streak: {mockUser.streak}d</span>
         </p>
       </div>

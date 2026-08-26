@@ -32,7 +32,7 @@ export default function Roadmap() {
         <div className="absolute left-6 top-0 bottom-0 w-px bg-gradient-to-b from-emerald-500/40 via-indigo-500/20 to-transparent hidden md:block" />
 
         <div className="space-y-4">
-          {mockRoadmap.map((item) => {
+          {mockRoadmap.map((item: any) => {
             const cfg = statusConfig[item.status]
             return (
               <div key={item.week} className={`flex gap-5 items-start p-5 rounded-2xl border ${cfg.bar} transition-all duration-200`}>

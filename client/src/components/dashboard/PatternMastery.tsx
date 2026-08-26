@@ -21,7 +21,7 @@ export default function PatternMastery() {
       </div>
 
       <div className="space-y-5">
-        {mockPatterns.map((p) => {
+        {mockPatterns.map((p: any) => {
           const { label, color } = getMasteryLabel(p.mastery)
           return (
             <div key={p.name}>

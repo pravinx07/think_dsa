@@ -37,7 +37,7 @@ export default function StrengthAnalysis() {
             <p className="text-xs text-slate-600">Mastery &gt; 60%</p>
           </div>
         </div>
-        {mockStrongAreas.map((a) => (
+        {mockStrongAreas.map((a: any) => (
           <AreaCard key={a.name} {...a} isStrong={true} />
         ))}
       </div>
@@ -51,7 +51,7 @@ export default function StrengthAnalysis() {
             <p className="text-xs text-slate-600">Needs practice</p>
           </div>
         </div>
-        {mockWeakAreas.map((a) => (
+        {mockWeakAreas.map((a: any) => (
           <AreaCard key={a.name} {...a} isStrong={false} />
         ))}
       </div>

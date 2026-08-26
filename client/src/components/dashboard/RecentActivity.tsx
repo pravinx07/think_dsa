@@ -21,7 +21,7 @@ export default function RecentActivity() {
       </div>
 
       <div className="space-y-3">
-        {mockRecentActivity.map((item) => (
+        {mockRecentActivity.map((item: any) => (
           <div key={item.id} className="flex items-start gap-4 p-4 glass rounded-xl hover:border-white/10 transition-all duration-200">
             {/* Status dot */}
             <div className={`mt-1 w-2.5 h-2.5 rounded-full shrink-0 ${item.solved ? 'bg-emerald-400 shadow-[0_0_6px_#34d399]' : 'bg-red-400 shadow-[0_0_6px_#f87171]'}`} />

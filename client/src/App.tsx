@@ -7,6 +7,8 @@ import MentorPage from './pages/dashboard/MentorPage'
 import RoadmapPage from './pages/dashboard/RoadmapPage'
 import HistoryPage from './pages/dashboard/HistoryPage'
 
+import ChallengePage from './pages/dashboard/ChallengePage'
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -21,6 +23,7 @@ export default function App() {
           <Route path="mentor" element={<MentorPage />} />
           <Route path="roadmap" element={<RoadmapPage />} />
           <Route path="history" element={<HistoryPage />} />
+          <Route path="challenge" element={<ChallengePage />} />
         </Route>
 
         {/* Fallback */}

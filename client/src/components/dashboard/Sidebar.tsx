@@ -1,11 +1,13 @@
 import { NavLink } from 'react-router-dom'
+import { LayoutDashboard, BarChart3, Bot, Map, History, Users } from 'lucide-react'
 
 const navItems = [
-  { to: '/dashboard', label: 'Dashboard', icon: '', end: true },
-  { to: '/dashboard/analytics', label: 'Analytics', icon: '', end: false },
-  { to: '/dashboard/mentor', label: 'AI Mentor', icon: '', end: false },
-  { to: '/dashboard/roadmap', label: 'Roadmap', icon: '', end: false },
-  { to: '/dashboard/history', label: 'History', icon: '', end: false },
+  { to: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard className="w-4 h-4" />, end: true },
+  { to: '/dashboard/analytics', label: 'Analytics', icon: <BarChart3 className="w-4 h-4" />, end: false },
+  { to: '/dashboard/mentor', label: 'AI Mentor', icon: <Bot className="w-4 h-4" />, end: false },
+  { to: '/dashboard/roadmap', label: 'Roadmap', icon: <Map className="w-4 h-4" />, end: false },
+  { to: '/dashboard/history', label: 'History', icon: <History className="w-4 h-4" />, end: false },
+  { to: '/dashboard/challenge', label: 'Study Buddy', icon: <Users className="w-4 h-4" />, end: false },
 ]
 
 export default function Sidebar() {
@@ -31,7 +33,7 @@ export default function Sidebar() {
               key={item.to}
               to={item.to}
               end={item.end}
-              className={({ isActive }) =>
+              className={({ isActive }: { isActive: boolean }) =>
                 `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                   isActive
                     ? 'bg-indigo-500/15 text-indigo-300 border border-indigo-500/25'
@@ -67,7 +69,7 @@ export default function Sidebar() {
             key={item.to}
             to={item.to}
             end={item.end}
-            className={({ isActive }) =>
+            className={({ isActive }: { isActive: boolean }) =>
               `flex flex-col items-center gap-1 px-3 py-1.5 rounded-xl transition-all duration-200 ${
                 isActive ? 'text-indigo-400' : 'text-slate-600'
               }`
